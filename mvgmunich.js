@@ -21,7 +21,8 @@ Module.register("mvgmunich", {
         showUbahn: true, //show ubahn route
         showBus: true, // show bus route
         showTram: true, // show tram route
-        showSbahn: true // show sbahn route
+        showSbahn: true, // show sbahn route
+        excludedStops: [] // Stops to exclude from the listing
     },
 
     getStyles: function () {
@@ -62,7 +63,7 @@ Module.register("mvgmunich", {
 
     // Override getHeader method.
     getHeader: function () {
-        return this.data.header + " Munich: " + this.config.haltestelle;
+        return this.data.header + this.config.haltestelle;
     },
 
     socketNotificationReceived: function (notification, payload) {
