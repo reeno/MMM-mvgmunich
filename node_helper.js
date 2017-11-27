@@ -46,15 +46,41 @@ module.exports = NodeHelper.create({
             if (!error && response.statusCode === 200) {
                 var transport = "";
                 $ = cheerio.load(body);
+                var count = 1; // new counting variable
+                
                 $('tr').each(function (i, elem) {
-                    if ($(this).html().includes('lineColumn')) {
-                        transport += "<tr class='normal'>";
-                        $(this).each(function (j, element) {
-                            transport += $(this).html().trim();
-                        })
-                        transport += "</tr>";
-                    }
-                    if (i >= self.config.maxEntries) {
+                	if($(this).find('td.lineColumn').length != 0) { // current row has transport data
+                        
+                        // extract info into proper variables
+                		var line = $(this).find('td.lineColumn').text().trim();
+                		var station = $(this).find('td.stationColumn').text().trim();
+                		var min = $(this).find('td.inMinColumn').text().trim();
+
+						var excluded = false;
+                        // check if the destination is in the exclude list
+						if(self.config.excludedStops.length > 0) {
+							for (var f in self.config.excludedStops) {
+								var filter = self.config.excludedStops[f];
+								if (station.toLowerCase() == filter.toLowerCase()) {
+									excluded = true;
+									break;
+								}
+							}
+						}
+                		
+                        // destination isn't in the exclude list -> output
+						if (!excluded) {
+							transport += '<tr class="normal">'+
+							'<td class="lineColumn">'+line+'</td>'+
+							'<td class="stationColumn">'+station+'</td>'+
+							'<td class="inMinColumn">'+min+'</td>'+
+							'</tr>';
+							count++;
+						}               		
+                		
+                	}
+                	
+                    if (count >= self.config.maxEntries) {
                         return false;
                     }
                     self.sendSocketNotification("UPDATE", transport);
